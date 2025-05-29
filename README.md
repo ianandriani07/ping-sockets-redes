@@ -91,15 +91,204 @@ O cliente envia 10 mensagens sequenciais de "ping" para o servidor, que responde
 ## Código do projeto
 ### Servidor UDP
 ```python
+import socket
+import time
+
+def run_server():
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+    server_ip = "0.0.0.0"
+    port = 8000
+
+    server_socket.bind((server_ip, port))
+    print(f"Servidor UDP escutando em {server_ip}:{port}")
+    num = 1
+
+    while True:
+        request, client_address = server_socket.recvfrom(1024)
+        start_time = time.time()
+        request = request.decode('utf-8')
+        
+        end_time = time.time()
+
+        processing_time = end_time - start_time
+            
+        print(f"Ping de {client_address}: Ping {num} - Tempo de processamento: {processing_time:.6f} segundos")
+        num += 1
+        if request.lower() == "close":
+            server_socket.sendto("closed".encode('utf-8'), client_address)
+            print("Fechando servidor.")
+            break
+
+        response = "accepted".encode('utf-8')
+        server_socket.sendto(response, client_address)
+
+    server_socket.close()
+
+
+run_server()
 ```
 ### Cliente UDP
 ```python
+import socket
+import time
+
+
+SERVER_ADDRESS = '192.168.3.7' 
+SERVER_PORT = 8000
+NUM_PINGS = 10
+
+
+client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+client_socket.settimeout(1) 
+
+
+print("Iniciando cliente Ping UDP...\n")
+
+for seq in range(1, NUM_PINGS + 1):
+    timestamp = time.time()
+    message = f'Ping {seq} {timestamp}'
+
+    try:
+        start_time = time.time()
+
+        client_socket.sendto(message.encode(), (SERVER_ADDRESS, SERVER_PORT))
+
+        response, server = client_socket.recvfrom(1024)
+
+        end_time = time.time()
+
+        rtt = end_time - start_time
+
+        print(f"Resposta do servidor Pong {seq}: {response.decode()} | RTT = {rtt:.6f} segundos")
+        time.sleep(1)
+
+    except socket.timeout:
+        print(f"Ping {seq} falhou (Timeout - pacote perdido)")
+
+
+client_socket.sendto("close".encode(), (SERVER_ADDRESS, SERVER_PORT))
+try:
+    response, server = client_socket.recvfrom(1024)
+    print(f"\nServidor respondeu ao encerramento: {response.decode()}")
+except socket.timeout:
+    print("\nServidor não respondeu ao encerramento (Timeout).")
+
+client_socket.close()
+print("\nCliente Ping UDP finalizado.")
 ```
 ### Servidor TCP
 ```python
+import socket
+import time
+
+
+def run_server():
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    server_ip = "0.0.0.0"
+    port = 8000
+
+    server.bind((server_ip, port))
+    server.listen(1)
+    print(f"Servidor TCP escutando em {server_ip}:{port}")
+
+    client_socket, client_address = server.accept()
+    print(f"Conexão aceita de {client_address[0]}:{client_address[1]}")
+    num = 1
+
+    while True:
+        try:
+            request = client_socket.recv(1024)
+
+            start_time = time.time()
+
+            if not request:
+                print("Cliente desconectou.")
+                break
+
+            request = request.decode("utf-8")
+            print(f"Recebido: Ping {num}")
+
+            if request.lower() == "close":
+                client_socket.send("closed".encode("utf-8"))
+                print("Encerrando conexão com o cliente.")
+                break
+
+            client_socket.send(f"Pong {num}".encode("utf-8"))
+
+            end_time = time.time()
+
+            processing_time = end_time - start_time
+            print(f"Tempo de processamento deste ping: {processing_time:.6f} segundos")
+            num += 1
+
+        except Exception as e:
+            print(f"Erro: {e}")
+            break
+
+    client_socket.close()
+    server.close()
+    print("Servidor encerrado.")
+
+
+run_server()
 ```
 ### Cliente TCP
 ```python
+import socket
+import time
+
+
+SERVER_ADDRESS = '192.168.3.7' 
+SERVER_PORT = 8000
+NUM_PINGS = 10
+
+
+client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+client_socket.settimeout(1)  
+
+try:
+    client_socket.connect((SERVER_ADDRESS, SERVER_PORT))
+    print(f"Conectado ao servidor {SERVER_ADDRESS}:{SERVER_PORT}\n")
+
+    print("Iniciando cliente Ping TCP...\n")
+
+    for seq in range(1, NUM_PINGS + 1):
+        timestamp = time.time()
+        message = f'Ping {seq} {timestamp}'
+
+        try:
+            start_time = time.time()
+
+            client_socket.send(message.encode())
+
+            response = client_socket.recv(1024)
+
+            end_time = time.time()
+
+            rtt = end_time - start_time
+
+            print(f"Resposta do servidor: {response.decode()} | RTT = {rtt:.6f} segundos")
+
+            time.sleep(1)
+
+        except socket.timeout:
+            print(f"Ping {seq} falhou (Timeout - pacote considerado perdido)")
+
+    client_socket.send("close".encode())
+    try:
+        response = client_socket.recv(1024)
+        print(f"\nServidor respondeu ao encerramento: {response.decode()}")
+    except socket.timeout:
+        print("\nServidor não respondeu ao encerramento (Timeout).")
+
+except Exception as e:
+    print(f"Erro: {e}")
+
+finally:
+    client_socket.close()
+    print("\nCliente Ping TCP finalizado.")
 ```
 
 ## Conclusão
