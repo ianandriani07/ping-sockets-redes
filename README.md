@@ -1,156 +1,116 @@
-# Relatório — Exercício de Ping Pong com UDP e TCP
+# Sistema de Comunicação Cliente-Servidor via UDP e TCP: Ping Pong
 
-## 🎯 Objetivo
+## Descrição do projeto
 
-Implementar um sistema cliente-servidor em Python utilizando sockets com as seguintes funcionalidades:
+Este projeto consiste na implementação de um sistema de comunicação entre cliente e servidor utilizando os protocolos UDP e TCP com o objetivo de medir o tempo de resposta entre o envio de mensagens "ping" e o recebimento das respectivas mensagens "pong". A atividade foi realizada como parte do estudo prático de Redes de Computadores na UFSC.
 
-- Cliente envia 10 mensagens de **"ping"** ao servidor.
-- O servidor responde com **"pong"** a cada mensagem.
-- O cliente calcula o **RTT (Round Trip Time)** de cada interação.
-- Implementação realizada com dois protocolos:
-  - **UDP (User Datagram Protocol)**
-  - **TCP (Transmission Control Protocol)**
+O cliente envia 10 mensagens sequenciais de "ping" para o servidor, que responde com uma mensagem "pong" correspondente. O cliente mede o RTT (Round Trip Time) — tempo de ida e volta — para cada mensagem.
 
----
+## Autores do projeto
 
-## ⚙️ Configuração do Experimento
-
-- Linguagem: **Python**
-- Protocolos: **UDP e TCP**
-- Ambiente de teste: Rede local com endereços IP privados.
-- Porta utilizada: **8000**
+- Ian Andriani e Pedro Magnavita
 
 ---
 
-## 🚀 Execução e Resultados
+## Introdução
 
-### ✅ UDP — User Datagram Protocol
+### Objetivos específicos
 
-- **Características**:
-  - Não orientado à conexão.
-  - Não garante entrega ou ordem.
-  - Mais rápido, mas menos confiável.
+- Implementar um sistema cliente-servidor utilizando os protocolos UDP e TCP em Python.
+- Medir o tempo de viagem de ida e volta (RTT) para cada mensagem.
+- Simular um comportamento similar ao comando `ping` padrão, porém utilizando **protocolo UDP e TCP** ao invés de ICMP.
+- Estudar as diferenças de confiabilidade e desempenho entre os dois protocolos.
 
-#### ▶️ Saída do Servidor UDP
+## Software
 
-- O servidor recebeu **11 pings**.
-- Tempo de processamento próximo de **0 segundos** para todas as mensagens.
-- O servidor respondeu rapidamente a todas as mensagens.
+### Softwares utilizados
+
+- **Python 3.x**: linguagem de programação utilizada para desenvolver tanto o cliente quanto o servidor.
+- **Biblioteca socket**: módulo padrão do Python usado para criar conexões TCP e UDP.
+- **Windows PowerShell**: terminal utilizado para executar os scripts e visualizar as saídas.
+
+## Configurações
+
+- **Porta utilizada**: 8000
+- **Host**: `0.0.0.0` para o servidor (aceitando conexões de qualquer interface de rede).
+- **Cliente**: executado a partir de uma máquina na mesma rede local.
+
+### Observações importantes
+
+- No protocolo **UDP**, o cliente aguarda até **1 segundo** pela resposta do servidor, para simular a possibilidade de perda de pacotes.
+- No protocolo **TCP**, o cliente estabelece uma conexão persistente até o envio de todas as mensagens.
+
+## Resultados
+### Saída do servidor UDP
 
 ![Imagem do WhatsApp de 2025-05-20 à(s) 19 45 22_1b8422eb](https://github.com/user-attachments/assets/4222f455-ec63-4112-a643-00eaf180fde6)
 
----
+- O servidor recebeu corretamente as mensagens de ping.
+- Tempo de processamento no servidor foi praticamente zero.
+- O servidor escutou na porta 8000 e respondeu os "pong" adequadamente.
 
-#### ▶️ Saída do Cliente UDP
-
-- Todas as mensagens receberam resposta **"accepted"**.
-- RTT variou entre aproximadamente **0.0029 s** e **0.061 s**.
-- Nenhuma mensagem foi considerada perdida.
-
-**Exemplo de resultados:**
-
-| Ping | RTT (s)   |
-|-------|----------|
-| 1     | 0.015439 |
-| 2     | 0.041243 |
-| 3     | 0.002929 |
-| 4     | 0.009583 |
-| 5     | 0.061230 |
-| 6     | 0.004998 |
-| 7     | 0.005239 |
-| 8     | 0.005142 |
-| 9     | 0.004268 |
-| 10    | 0.004833 |
+### Saída do cliente UDP
 
 ![Imagem do WhatsApp de 2025-05-20 à(s) 19 45 59_74e20d3a](https://github.com/user-attachments/assets/322a4cb7-2392-49d2-8ddd-3f74158afc45)
 
+- O cliente conseguiu calcular o RTT para todas as mensagens.
+- RTT variando entre ~1 ms a ~61 ms.
+- Nenhuma mensagem foi perdida durante a execução.
+- O cliente enviou uma mensagem de encerramento ao servidor ao final.
+
 ---
 
-### ✅ TCP — Transmission Control Protocol
-
-- **Características**:
-  - Orientado à conexão.
-  - Garante entrega, ordem e integridade dos dados.
-  - Mais confiável, mas com maior overhead.
-
-#### ▶️ Saída do Servidor TCP
-
-- O servidor aceitou a conexão de **192.168.3.71**.
-- Recebeu todas as mensagens "Ping".
-- Alguns pings tiveram tempo de processamento diferente de **zero**, por exemplo: 
-
-  - **Ping 3**: ~0.0159 s
-  - **Ping 9**: ~0.0179 s
+### Saída do servidor TCP
 
 ![Imagem do WhatsApp de 2025-05-20 à(s) 19 47 38_9fbd4b32](https://github.com/user-attachments/assets/ec7d61e5-7193-4d86-82df-3fd1539fde65)
 
----
+- O servidor TCP aceitou a conexão do cliente.
+- As mensagens foram recebidas sequencialmente e respondidas com o "pong".
+- Alguns tempos de processamento foram superiores a 15 ms, indicando possíveis flutuações na rede ou no processamento.
 
-#### ▶️ Saída do Cliente TCP
-
-- Todas as mensagens "pong" foram recebidas com sucesso.
-- RTT variou mais do que no UDP, com alguns picos elevados.
-
-**Exemplo de resultados:**
-
-| Ping | RTT (s)   |
-|-------|----------|
-| 1     | 0.008502 |
-| 2     | 0.004173 |
-| 3     | 0.074939 |
-| 4     | 0.003664 |
-| 5     | 0.004571 |
-| 6     | 0.004503 |
-| 7     | 0.079187 |
-| 8     | 0.233031 |
-| 9     | 0.128301 |
-| 10    | 0.119791 |
+### Saída do cliente TCP
 
 ![Imagem do WhatsApp de 2025-05-20 à(s) 19 48 10_1d5b726d](https://github.com/user-attachments/assets/5c9d2f3d-002c-4a4f-b9d8-a396555bdf61)
 
----
-
-## 🧐 Análise Comparativa
-
-| Protocolo | Garantia de entrega | Overhead | RTT médio | Variabilidade |
-|-----------|---------------------|----------|----------|--------------|
-| UDP       | Não                 | Baixo    | Baixo    | Baixa        |
-| TCP       | Sim                 | Alto     | Variável | Alta         |
-
-### ✅ UDP
-- Mais eficiente.
-- RTTs estáveis.
-- Não houve perda de pacotes no experimento.
-
-### ✅ TCP
-- Mais confiável.
-- RTTs mais variáveis e, em alguns casos, altos.
-- Ideal para aplicações onde a integridade dos dados é mais importante que a latência.
+- O cliente calculou o RTT para cada mensagem enviada.
+- Algumas respostas apresentaram RTTs elevados, chegando até ~230 ms, o que pode ser atribuído ao overhead do protocolo TCP.
+- O cliente encerrou a conexão após o envio de todas as mensagens.
 
 ---
 
-## 📌 Conclusões
+## Comparativo dos resultados
 
-- O UDP se mostrou mais rápido e com RTTs menores, como esperado.
-- O TCP apresentou maior variabilidade, o que é coerente com o seu comportamento orientado à conexão.
-- Nenhuma perda de pacotes foi detectada neste experimento, indicando boas condições da rede local.
+| Protocolo | RTT Mínimo | RTT Máximo | Mensagens Perdidas |
+|-----------|------------|------------|--------------------|
+| UDP       | ~0.0029 s  | ~0.0612 s  | 0                  |
+| TCP       | ~0.0041 s  | ~0.2303 s  | 0                  |
 
----
+- O **UDP** apresentou menor variabilidade no RTT, com tempos mais curtos e estáveis.
+- O **TCP** apresentou maior variação, incluindo picos elevados de RTT, devido aos mecanismos de controle de fluxo e confiabilidade.
 
-## 📝 Aprendizados
+## Código do projeto
+### Servidor UDP
+```python
+```
+### Cliente UDP
+```python
+```
+### Servidor TCP
+```python
+```
+### Cliente TCP
+```python
+```
 
-- Como programar sockets em Python usando **TCP** e **UDP**.
-- Como calcular **RTT** de forma simples.
-- Diferenças práticas entre **protocolos orientados e não orientados à conexão**.
+## Conclusão
 
----
+A experiência demonstrou, na prática, as diferenças fundamentais entre UDP e TCP:
 
-## 💡 Sugestões de aprimoramento
+- **UDP** é mais rápido, mas não garante entrega nem ordem das mensagens.
+- **TCP** é mais confiável, mas adiciona overhead, o que pode aumentar o tempo de resposta.
 
-- Introduzir **simulação de perda de pacotes** no servidor.
-- Testar em redes com maior latência ou instabilidade.
-- Adicionar gráficos de RTT para melhor visualização.
-- Implementar **controle de fluxo** no UDP para evitar perda.
+Ambos os protocolos foram eficazes para o propósito de enviar e receber mensagens de "ping" e "pong", com suas respectivas vantagens e desvantagens.
 
----
-
+## Referências
+- Documentação oficial Python: https://docs.python.org/3/library/socket.html
+- Material de apoio da disciplina Redes de Computadores - UFSC
